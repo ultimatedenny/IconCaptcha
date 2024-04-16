@@ -1,0 +1,90 @@
+﻿@inject IconCaptcha.IconCaptchaService IconCaptcha
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <title>@ViewBag.Title</title>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=10" />
+    <meta name="author" content="Deni Andrean © @DateTime.Now.Year" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <link href="/demo.css" rel="stylesheet" type="text/css">
+    <script src="/demo.js" type="text/javascript"></script>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700" rel="stylesheet">
+    <link href="/css/icon-captcha.min.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <p class="message"></p>
+            <form method="post" asp-action="AjaxFormSubmit">
+                <input type="hidden" name="_iconcaptcha-token" value="@IconCaptcha.Token()" />
+                <div class="iconcaptcha-holder" data-theme="light"></div>
+                <input type="submit" value="Submit demo captcha" class="btn">
+            </form>
+            <div class="themes">
+                <div class="theme theme--light"><span data-theme="light"></span><span>Light</span></div>
+                <div class="theme theme--legacy-light"><span data-theme="legacy-light"></span><span>Legacy Light</span></div>
+                <div class="theme theme--dark"><span data-theme="dark"></span><span>Dark</span></div>
+                <div class="theme theme--legacy-dark"><span data-theme="legacy-dark"></span><span>Legacy Dark</span></div>
+            </div>
+            <small>(theme selector only works when the challenge has not been requested yet)</small>
+        </div>
+        <div class="copyright">
+            <p>Copyright &copy; @DateTime.Now.Year Deni Andrean - All rights reserved</p>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/js/icon-captcha.min.js" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.iconcaptcha-holder').iconCaptcha({
+                general: {
+                    validationPath: '/iconcaptcha',
+                    fontFamily: 'Poppins',
+                    credits: 'show',
+                },
+                security: {
+                    clickDelay: 500,
+                    hoverDetection: true,
+                    enableInitialMessage: true,
+                    initializeDelay: 500,
+                    selectionResetDelay: 3000,
+                    loadingAnimationDelay: 1000,
+                    invalidateTime: 1000 * 60 * 2,
+                },
+                messages: {
+                    initialization: {
+                        verify: 'Verify that you are human.',
+                        loading: 'Loading challenge...',
+                    },
+                    header: 'Select the image that has no similarity.',
+                    correct: 'Verification complete.',
+                    incorrect: {
+                        title: 'Uh oh.',
+                        subtitle: "You've selected the wrong image."
+                    },
+                    timeout: {
+                        title: 'Please wait 60 sec.',
+                        subtitle: 'You made too many incorrect selections.'
+                    }
+                }
+            })
+            $('form').submit(function (e) {
+                e.preventDefault();
+                const form = $(this);
+                $.ajax({
+                    type: 'POST',
+                    url: form.attr('action'),
+                    data: form.serialize()
+                }).done(function (data) {
+                    $('.message').html(data);
+                }).fail(function () {
+                    console.log('Error: Failed to submit form.')
+                });
+            });
+        });
+    </script>
+</body>
+</html>
